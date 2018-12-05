@@ -1,43 +1,54 @@
 #include <Adafruit_NeoPixel.h>
+#include <Wire.h>
+#include "rgb_lcd.h"
 
 #define LED_COUNT 120
 #define LED_PIN   6
 #define BUTTON    2
 
 Adafruit_NeoPixel led = Adafruit_NeoPixel( LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-
-int state = 0;
+rgb_lcd lcd;
 
 void setup() {
   Serial.begin(38400);
   led.begin();
-  led.setBrightness(64); // 0-255の範囲で輝度を調整
+  led.setBrightness(120); // 0-255の範囲で輝度を調整
   led.show();
+
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+  lcd.noAutoscroll();
+
   pinMode(BUTTON, INPUT);
 }
 
 void loop() {
+  lcd.setCursor(0, 0);
+  lcd.print(state);
+
+  static int state = 0;
+
   switch (state) {
     case 0:
       if (pushButton() == true) state++;
       break;
     case 1:
-      if (show_1() == true)  state++;
+      if (line() == true)  state++;
       break;
     case 2:
-      if (show_2() == true) state++;
+      if (random_blink() == true) state++;
       break;
     case 3:
-      if (show_3() == true) state++;
+      if (slow_blink_orange() == true) state++;
       break;
     case 4:
-      if (show_4() == true) state++;
+      if (slow_blink_blue() == true) state++;
       break;
     case 5:
-      if (show_5() == true) state++;
+      if (random_lighting() == true) state++;
       break;
     case 6:
-      if (show_6() == true) state++;
+      if (random_lighting_2() == true) state++;
       break;
     default:
       state = 0;
@@ -48,14 +59,16 @@ void loop() {
 boolean pushButton() {
   if (digitalRead(BUTTON) == HIGH) {
     while (digitalRead(BUTTON) == HIGH) {}
+    delay(200);
     led.clear();
+    led.show();
     return true;
   }
   return false;
 }
 
 
-boolean show_1(){
+boolean line(){
   for (int i = 0 ; i < LED_COUNT + 20; i++ ) {
     int r = random(0, 255);
     int g = random(0, 255);
@@ -73,18 +86,19 @@ boolean show_1(){
 }
 
 
-boolean show_2() {
-  int r = random(0, 255);
-  int g = random(0, 255);
-  int b = random(0, 255);
+boolean random_blink() {
   static int pixel[20];
   pixel[0] = random(1, 120);
 
-  led.setPixelColor(pixel[0], led.Color(r, g, b));
-  led.show();
-  delay(200);
+  int r = random(0, 255);
+  int g = random(0, 255);
+  int b = random(0, 255);
 
+  led.setPixelColor(pixel[0], led.Color(r, g, b));
   led.setPixelColor(pixel[19], led.Color(0, 0, 0));
+  led.show();
+
+  delay(50);
 
   for (int i = 19; i > 0; i--) {
     pixel[i] = pixel[i - 1];
@@ -95,7 +109,7 @@ boolean show_2() {
 }
 
 
-boolean show_3() {
+boolean slow_blink_orange() {
   for (int i = 20; i <= 200; i++) {
     for (int j = 0; j <= 120; j++) {
       led.setPixelColor(j, led.Color(i, 20, 0));  
@@ -103,7 +117,9 @@ boolean show_3() {
     if (pushButton() == true) return true;
     led.show();
   }
+  
   delay(120);
+  
   for (int i = 200; i >= 20; i--) {
     for (int j = 0; j <= 120; j++) {
       led.setPixelColor(j, led.Color(i, 20, 0));  
@@ -117,7 +133,7 @@ boolean show_3() {
 }
 
 
-boolean show_4() {
+boolean slow_blink_blue() {
   for (int i = 0; i <= 100; i++) {
     for (int j = 0; j <= 120; j++) {
       led.setPixelColor(j    , led.Color(i, i, i));  
@@ -152,7 +168,7 @@ boolean show_4() {
 }
 
 
-boolean show_5() {
+boolean random_lighting() {
   for (int i = 0; i < 256; i++) {
     int r = random(0, 100);
     int g = random(0, 100);
@@ -169,7 +185,7 @@ boolean show_5() {
 }
 
 
-boolean show_6() {
+boolean random_lighting_2() {
   for (int i = 0; i < 256; i++) {
     int r = random(0, 100);
     int g = random(0, 100);
@@ -183,9 +199,6 @@ boolean show_6() {
   delay(1200);
   if (pushButton() == true) return true;
 
-//  for (int i = 0; i < 256; i++) {
-//    led.setPixelColor(i, led.Color(0, 0, 0));  
-//  }
   led.clear();
   led.show();
 
@@ -202,9 +215,6 @@ boolean show_6() {
   delay(1200);
   if (pushButton() == true) return true;
 
-//  for (int i = 0; i < 256; i++) {
-//    led.setPixelColor(i, led.Color(0, 0, 0));  
-//  }
   led.clear();
   led.show();
 
