@@ -48,7 +48,7 @@ void loop() {
 boolean pushButton() {
   if (digitalRead(BUTTON) == HIGH) {
     while (digitalRead(BUTTON) == HIGH) {}
-    clear();
+    led.clear();
     return true;
   }
   return false;
@@ -186,7 +186,7 @@ boolean show_6() {
 //  for (int i = 0; i < 256; i++) {
 //    led.setPixelColor(i, led.Color(0, 0, 0));  
 //  }
-  clear();
+  led.clear();
   led.show();
 
   for (int i = 1; i < 256; i++) {
@@ -205,7 +205,7 @@ boolean show_6() {
 //  for (int i = 0; i < 256; i++) {
 //    led.setPixelColor(i, led.Color(0, 0, 0));  
 //  }
-  clear();
+  led.clear();
   led.show();
 
   if (pushButton() == true) return true;
