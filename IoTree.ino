@@ -5,6 +5,7 @@
 #define LED_COUNT 120
 #define LED_PIN   6
 #define BUTTON    2
+#define CdS       2
 
 Adafruit_NeoPixel led = Adafruit_NeoPixel( LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 rgb_lcd lcd;
@@ -23,10 +24,86 @@ void setup() {
 }
 
 void loop() {
-  lcd.setCursor(0, 0);
-  lcd.print(state);
-
+  static unsigned long cur_mTime;
+  static unsigned long pre_mTime;
+  static unsigned int h;
+  static unsigned int m;
+  static unsigned int s;
+  
   static int state = 0;
+
+  lcd.setCursor(0, 0);
+  lcd.print("[");
+  lcd.setCursor(1, 0);
+  lcd.print(state);
+  lcd.setCursor(2, 0);
+  lcd.print("]");
+
+  cur_mTime = millis();
+  cur_mTime = cur_mTime / 1000;
+
+  int diff = 0;
+  diff = cur_mTime - pre_mTime;
+  if (diff > 0) {
+    s ++;
+    if (s > 59) {
+      m++;
+      s = 0;
+    }
+    if (m > 59) {
+      h++;
+      m = 0;
+    }
+    if (h > 23) {
+      h = 0;
+    }
+  }
+  pre_mTime = cur_mTime;
+
+  if (h < 10) {
+    lcd.setCursor(2, 1);
+    lcd.print(h);
+  } else {
+    lcd.setCursor(1, 1);
+    lcd.print(h);
+  }
+  lcd.setCursor(3, 1);
+  lcd.print(":");
+
+  if (m < 10) {
+    lcd.setCursor(4, 1);
+    lcd.print("0");
+    lcd.setCursor(5, 1);
+    lcd.print(m);
+  } else {
+    lcd.setCursor(4, 1);
+    lcd.print(m);
+  }
+  lcd.setCursor(6, 1);
+  lcd.print(":");
+
+  if (s < 10) {
+    lcd.setCursor(7, 1);
+    lcd.print("0");
+    lcd.setCursor(8, 1);
+    lcd.print(s);
+  } else {
+    lcd.setCursor(7, 1);
+    lcd.print(s);
+  }
+  
+  // 部屋が暗くなったらLED消灯
+  int val = analogRead(CdS);
+  if (val > 810) {
+    led.clear();
+    led.show();
+    state = 0;
+  }
+  lcd.setCursor(13, 0);
+  lcd.print(val);
+
+  //memo
+  //前回暗くて、今回明るいならLED点灯
 
   switch (state) {
     case 0:
